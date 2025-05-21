@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Armoire Equipment Viewer</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
+
+    body {
+      background: #0f0f1a;
+      color: #00ffd5;
+      font-family: 'Orbitron', sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      text-transform: uppercase;
+      margin-bottom: 30px;
+      letter-spacing: 3px;
+      text-shadow: 0 0 8px #00ffd5;
+    }
+
+    #searchInput {
+      padding: 10px;
+      width: 60%;
+      border: 1.5px solid #00ffd5;
+      background: #111126;
+      color: #00ffd5;
+      font-family: 'Orbitron', monospace;
+      border-radius: 5px;
+      margin: 0 auto 20px;
+      display: block;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #111126;
+      box-shadow: 0 0 15px #00ffd5aa;
+    }
+
+    th, td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #00ffd5aa;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #001f2a;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    tr:hover {
+      background: #003c4a;
+    }
+
+    button.expand-btn {
+      color: #00ffc1;
+      background: none;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: underline;
+      font-family: 'Orbitron', monospace;
+      padding: 0;
+      margin: 0;
+    }
+
+    button.expand-btn:hover {
+      color: #00ff9e;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Armoire Equipment List</h1>
+
+  <input type="text" id="searchInput" placeholder="Search by Equipment or Armoire..." />
+
+  <table id="equipmentTable">
+    <thead>
+      <tr>
+        <th>Equipment</th>
+        <th>Datasheet</th>
+        <th>Armoire Number</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Content will be inserted by JS -->
+    </tbody>
+  </table>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      getDocs
+    } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD-rWV2rQ-CIksd825JxJw5Hlb430hm2Eo",
+      authDomain: "armoire-equipments.firebaseapp.com",
+      projectId: "armoire-equipments",
+      storageBucket: "armoire-equipments.firebasestorage.app",
+      messagingSenderId: "893663162061",
+      appId: "1:893663162061:web:de1b3b8b611d47482c8384"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const equipmentRef = collection(db, "equipment");
+
+    async function loadEquipment(filter = "") {
+      const snapshot = await getDocs(equipmentRef);
+      const tableBody = document.querySelector("#equipmentTable tbody");
+      tableBody.innerHTML = "";
+
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        const match = data.name.toLowerCase().includes(filter) || (data.armoire || "").toLowerCase().includes(filter);
+        if (!match) return;
+
+        const row = document.createElement("tr");
+
+        const nameCell = document.createElement("td");
+        nameCell.textContent = data.name;
+
+        const sheetCell = document.createElement("td");
+        const button = document.createElement("button");
+        button.textContent = "View Datasheet";
+        button.className = "expand-btn";
+
+        const datasheet = document.createElement("p");
+        datasheet.textContent = data.datasheet;
+        datasheet.style.display = "none";
+        datasheet.style.whiteSpace = "pre-wrap";
+
+        button.onclick = () => {
+          datasheet.style.display = datasheet.style.display === "none" ? "block" : "none";
+        };
+
+        sheetCell.appendChild(button);
+        sheetCell.appendChild(datasheet);
+
+        const armoireCell = document.createElement("td");
+        armoireCell.textContent = data.armoire || "—";
+
+        row.appendChild(nameCell);
+        row.appendChild(sheetCell);
+        row.appendChild(armoireCell);
+
+        tableBody.appendChild(row);
+      });
+    }
+
+    document.getElementById("searchInput").addEventListener("input", e => {
+      const filter = e.target.value.trim().toLowerCase();
+      loadEquipment(filter);
+    });
+
+    loadEquipment();
+  </script>
+</body>
+</html>
