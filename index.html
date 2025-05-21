@@ -7,10 +7,6 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
 
-    * {
-      box-sizing: border-box;
-    }
-
     body {
       background: #0f0f1a;
       color: #00ffd5;
@@ -25,13 +21,11 @@
       margin-bottom: 30px;
       letter-spacing: 3px;
       text-shadow: 0 0 8px #00ffd5;
-      font-size: 1.8rem;
     }
 
     #searchInput {
-      padding: 12px;
-      width: 100%;
-      max-width: 600px;
+      padding: 10px;
+      width: 60%;
       border: 1.5px solid #00ffd5;
       background: #111126;
       color: #00ffd5;
@@ -39,16 +33,10 @@
       border-radius: 5px;
       margin: 0 auto 20px;
       display: block;
-      font-size: 1rem;
-    }
-
-    .table-container {
-      overflow-x: auto;
     }
 
     table {
       width: 100%;
-      min-width: 500px;
       border-collapse: collapse;
       background: #111126;
       box-shadow: 0 0 15px #00ffd5aa;
@@ -81,30 +69,31 @@
       font-family: 'Orbitron', monospace;
       padding: 0;
       margin: 0;
-      font-size: 0.9rem;
     }
 
     button.expand-btn:hover {
       color: #00ff9e;
     }
 
-    p {
-      margin-top: 5px;
-      font-size: 0.9rem;
-    }
-
+    /* ====== Mobile Friendly CSS (added) ====== */
     @media (max-width: 600px) {
-      h1 {
-        font-size: 1.4rem;
+      body {
+        padding: 10px;
       }
 
       #searchInput {
-        font-size: 0.9rem;
+        width: 90% !important;
+        font-size: 1em;
+      }
+
+      table {
+        font-size: 0.9em;
+        overflow-x: auto;
+        display: block;
       }
 
       th, td {
-        padding: 10px;
-        font-size: 0.85rem;
+        white-space: nowrap;
       }
     }
   </style>
@@ -115,20 +104,18 @@
 
   <input type="text" id="searchInput" placeholder="Search by Equipment or Armoire..." />
 
-  <div class="table-container">
-    <table id="equipmentTable">
-      <thead>
-        <tr>
-          <th>Equipment</th>
-          <th>Datasheet</th>
-          <th>Armoire Number</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Content will be inserted by JS -->
-      </tbody>
-    </table>
-  </div>
+  <table id="equipmentTable">
+    <thead>
+      <tr>
+        <th>Equipment</th>
+        <th>Datasheet</th>
+        <th>Armoire Number</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Content will be inserted by JS -->
+    </tbody>
+  </table>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
