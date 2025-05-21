@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Liste des Équipements</title>
+  <title>Armoire Equipment Viewer</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
 
@@ -19,6 +19,7 @@
       text-align: center;
       text-transform: uppercase;
       margin-bottom: 30px;
+      letter-spacing: 3px;
       text-shadow: 0 0 8px #00ffd5;
     }
 
@@ -28,6 +29,7 @@
       border: 1.5px solid #00ffd5;
       background: #111126;
       color: #00ffd5;
+      font-family: 'Orbitron', monospace;
       border-radius: 5px;
       margin: 0 auto 20px;
       display: block;
@@ -36,26 +38,31 @@
 
     table {
       width: 100%;
-      max-width: 1000px;
+      max-width: 900px;
       margin: 0 auto;
       border-collapse: collapse;
-      box-shadow: 0 0 15px #00ffd577;
+      box-shadow: 0 0 20px #00ffd577;
     }
 
     th, td {
-      padding: 12px;
+      padding: 12px 16px;
       text-align: left;
-      border-bottom: 1px solid #00ffd533;
+      border-bottom: 1px solid #00ffd555;
     }
 
     th {
       background-color: #111126;
       color: #00ffd5;
+      font-size: 1.1rem;
       text-transform: uppercase;
     }
 
     tr:nth-child(even) {
       background-color: #111126cc;
+    }
+
+    tr:hover {
+      background-color: #00ffd511;
     }
 
     .expand-btn {
@@ -66,7 +73,7 @@
       cursor: pointer;
       text-decoration: underline;
       font-family: 'Orbitron', monospace;
-      font-size: 0.95rem;
+      font-size: 1rem;
     }
 
     .datasheet-row {
@@ -74,10 +81,10 @@
     }
 
     .datasheet-cell {
+      padding: 10px 16px;
       color: #00ffd5;
-      background-color: #0f0f1a;
-      padding: 15px;
-      font-size: 0.9rem;
+      background: #0f0f1a;
+      font-size: 0.95rem;
     }
 
     @media (max-width: 600px) {
@@ -92,20 +99,20 @@
 </head>
 <body>
 
-  <h1>Liste des Équipements</h1>
+  <h1>Armoire Equipment List</h1>
 
-  <input type="text" id="searchInput" placeholder="Rechercher un équipement ou une armoire..." />
+  <input type="text" id="searchInput" placeholder="Search by Equipment or Armoire..." />
 
   <table id="equipmentTable">
     <thead>
       <tr>
-        <th>Nom</th>
+        <th>Equipment Name</th>
         <th>Armoire</th>
-        <th>Fiche Technique</th>
+        <th>Datasheet</th>
       </tr>
     </thead>
     <tbody>
-      <!-- Lignes dynamiques insérées ici -->
+      <!-- Dynamic rows go here -->
     </tbody>
   </table>
 
@@ -121,7 +128,7 @@
       apiKey: "AIzaSyD-rWV2rQ-CIksd825JxJw5Hlb430hm2Eo",
       authDomain: "armoire-equipments.firebaseapp.com",
       projectId: "armoire-equipments",
-      storageBucket: "armoire-equipments.appspot.com",
+      storageBucket: "armoire-equipments.firebasestorage.app",
       messagingSenderId: "893663162061",
       appId: "1:893663162061:web:de1b3b8b611d47482c8384"
     };
@@ -135,14 +142,13 @@
       const tbody = document.querySelector("#equipmentTable tbody");
       tbody.innerHTML = "";
 
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        const name = data.name?.toLowerCase() || "";
-        const armoire = data.armoire?.toLowerCase() || "";
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        const nameLower = data.name.toLowerCase();
+        const armoireLower = (data.armoire || "").toLowerCase();
+        if (!nameLower.includes(filter) && !armoireLower.includes(filter)) return;
 
-        if (!name.includes(filter) && !armoire.includes(filter)) return;
-
-        // Row principale
+        // Main row
         const row = document.createElement("tr");
 
         const nameCell = document.createElement("td");
@@ -151,35 +157,35 @@
         const armoireCell = document.createElement("td");
         armoireCell.textContent = data.armoire || "—";
 
-        const actionCell = document.createElement("td");
+        const btnCell = document.createElement("td");
         const btn = document.createElement("button");
         btn.className = "expand-btn";
-        btn.textContent = "Voir";
-        actionCell.appendChild(btn);
+        btn.textContent = "View";
+        btnCell.appendChild(btn);
 
         row.appendChild(nameCell);
         row.appendChild(armoireCell);
-        row.appendChild(actionCell);
+        row.appendChild(btnCell);
 
-        // Ligne fiche technique cachée
-        const dsRow = document.createElement("tr");
-        dsRow.className = "datasheet-row";
+        // Datasheet row
+        const datasheetRow = document.createElement("tr");
+        datasheetRow.className = "datasheet-row";
 
-        const dsCell = document.createElement("td");
-        dsCell.colSpan = 3;
-        dsCell.className = "datasheet-cell";
-        dsCell.textContent = data.datasheet || "Pas de fiche technique disponible.";
+        const datasheetCell = document.createElement("td");
+        datasheetCell.colSpan = 3;
+        datasheetCell.className = "datasheet-cell";
+        datasheetCell.textContent = data.datasheet || "No datasheet available.";
 
-        dsRow.appendChild(dsCell);
+        datasheetRow.appendChild(datasheetCell);
 
         btn.addEventListener("click", () => {
-          const visible = dsRow.style.display === "table-row";
-          dsRow.style.display = visible ? "none" : "table-row";
-          btn.textContent = visible ? "Voir" : "Masquer";
+          const isVisible = datasheetRow.style.display === "table-row";
+          datasheetRow.style.display = isVisible ? "none" : "table-row";
+          btn.textContent = isVisible ? "View" : "Hide";
         });
 
         tbody.appendChild(row);
-        tbody.appendChild(dsRow);
+        tbody.appendChild(datasheetRow);
       });
     }
 
