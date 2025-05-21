@@ -33,30 +33,38 @@
       border-radius: 5px;
       margin: 0 auto 20px;
       display: block;
+      font-size: 1rem;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
+    /* Container for all equipment cards */
+    #equipmentList {
+      max-width: 700px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Single equipment card */
+    .equipment-card {
       background: #111126;
+      border: 1.5px solid #00ffd5aa;
+      border-radius: 8px;
+      padding: 15px 20px;
       box-shadow: 0 0 15px #00ffd5aa;
     }
 
-    th, td {
-      padding: 12px 15px;
-      border-bottom: 1px solid #00ffd5aa;
-      text-align: left;
-      vertical-align: top;
+    .equipment-name {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      letter-spacing: 1.5px;
     }
 
-    th {
-      background: #001f2a;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-    }
-
-    tr:hover {
-      background: #003c4a;
+    .armoire-number {
+      font-size: 1rem;
+      margin-bottom: 10px;
+      color: #00ffc1;
     }
 
     button.expand-btn {
@@ -68,32 +76,38 @@
       text-decoration: underline;
       font-family: 'Orbitron', monospace;
       padding: 0;
-      margin: 0;
+      margin-bottom: 8px;
+      font-size: 1rem;
     }
 
     button.expand-btn:hover {
       color: #00ff9e;
     }
 
-    /* ====== Mobile Friendly CSS (added) ====== */
-    @media (max-width: 600px) {
-      body {
-        padding: 10px;
-      }
+    .datasheet {
+      white-space: pre-wrap;
+      display: none;
+      color: #00ffd5;
+      font-size: 0.9rem;
+      border-top: 1px solid #00ffd5aa;
+      padding-top: 10px;
+      margin-top: 5px;
+    }
 
+    /* Responsive */
+    @media (max-width: 600px) {
       #searchInput {
         width: 90% !important;
-        font-size: 1em;
+        font-size: 1rem;
       }
 
-      table {
-        font-size: 0.9em;
-        overflow-x: auto;
-        display: block;
+      #equipmentList {
+        max-width: 100%;
+        padding: 0 10px;
       }
 
-      th, td {
-        white-space: nowrap;
+      .equipment-card {
+        padding: 12px 15px;
       }
     }
   </style>
@@ -104,18 +118,9 @@
 
   <input type="text" id="searchInput" placeholder="Search by Equipment or Armoire..." />
 
-  <table id="equipmentTable">
-    <thead>
-      <tr>
-        <th>Equipment</th>
-        <th>Datasheet</th>
-        <th>Armoire Number</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Content will be inserted by JS -->
-    </tbody>
-  </table>
+  <div id="equipmentList">
+    <!-- Equipment cards inserted here -->
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
@@ -140,44 +145,50 @@
 
     async function loadEquipment(filter = "") {
       const snapshot = await getDocs(equipmentRef);
-      const tableBody = document.querySelector("#equipmentTable tbody");
-      tableBody.innerHTML = "";
+      const list = document.getElementById("equipmentList");
+      list.innerHTML = "";
 
       snapshot.forEach(docSnap => {
         const data = docSnap.data();
-        const match = data.name.toLowerCase().includes(filter) || (data.armoire || "").toLowerCase().includes(filter);
-        if (!match) return;
+        const nameLower = data.name.toLowerCase();
+        const armoireLower = (data.armoire || "").toLowerCase();
+        if (!nameLower.includes(filter) && !armoireLower.includes(filter)) return;
 
-        const row = document.createElement("tr");
+        const card = document.createElement("div");
+        card.className = "equipment-card";
 
-        const nameCell = document.createElement("td");
-        nameCell.textContent = data.name;
+        const nameEl = document.createElement("div");
+        nameEl.className = "equipment-name";
+        nameEl.textContent = data.name;
 
-        const sheetCell = document.createElement("td");
-        const button = document.createElement("button");
-        button.textContent = "View Datasheet";
-        button.className = "expand-btn";
+        const armoireEl = document.createElement("div");
+        armoireEl.className = "armoire-number";
+        armoireEl.textContent = "Armoire: " + (data.armoire || "—");
 
-        const datasheet = document.createElement("p");
-        datasheet.textContent = data.datasheet;
-        datasheet.style.display = "none";
-        datasheet.style.whiteSpace = "pre-wrap";
+        const btn = document.createElement("button");
+        btn.className = "expand-btn";
+        btn.textContent = "View Datasheet";
 
-        button.onclick = () => {
-          datasheet.style.display = datasheet.style.display === "none" ? "block" : "none";
-        };
+        const datasheetEl = document.createElement("div");
+        datasheetEl.className = "datasheet";
+        datasheetEl.textContent = data.datasheet || "No datasheet available.";
 
-        sheetCell.appendChild(button);
-        sheetCell.appendChild(datasheet);
+        btn.addEventListener("click", () => {
+          if (datasheetEl.style.display === "none" || datasheetEl.style.display === "") {
+            datasheetEl.style.display = "block";
+            btn.textContent = "Hide Datasheet";
+          } else {
+            datasheetEl.style.display = "none";
+            btn.textContent = "View Datasheet";
+          }
+        });
 
-        const armoireCell = document.createElement("td");
-        armoireCell.textContent = data.armoire || "—";
+        card.appendChild(nameEl);
+        card.appendChild(armoireEl);
+        card.appendChild(btn);
+        card.appendChild(datasheetEl);
 
-        row.appendChild(nameCell);
-        row.appendChild(sheetCell);
-        row.appendChild(armoireCell);
-
-        tableBody.appendChild(row);
+        list.appendChild(card);
       });
     }
 
