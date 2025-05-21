@@ -36,36 +36,38 @@
       font-size: 1rem;
     }
 
-    table {
-      width: 100%;
-      max-width: 900px;
+    /* Container for all equipment cards */
+    #equipmentList {
+      max-width: 700px;
       margin: 0 auto;
-      border-collapse: collapse;
-      box-shadow: 0 0 20px #00ffd577;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
     }
 
-    th, td {
-      padding: 12px 16px;
-      text-align: left;
-      border-bottom: 1px solid #00ffd555;
+    /* Single equipment card */
+    .equipment-card {
+      background: #111126;
+      border: 1.5px solid #00ffd5aa;
+      border-radius: 8px;
+      padding: 15px 20px;
+      box-shadow: 0 0 15px #00ffd5aa;
     }
 
-    th {
-      background-color: #111126;
-      color: #00ffd5;
-      font-size: 1.1rem;
-      text-transform: uppercase;
+    .equipment-name {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      letter-spacing: 1.5px;
     }
 
-    tr:nth-child(even) {
-      background-color: #111126cc;
+    .armoire-number {
+      font-size: 1rem;
+      margin-bottom: 10px;
+      color: #00ffc1;
     }
 
-    tr:hover {
-      background-color: #00ffd511;
-    }
-
-    .expand-btn {
+    button.expand-btn {
       color: #00ffc1;
       background: none;
       border: none;
@@ -73,26 +75,39 @@
       cursor: pointer;
       text-decoration: underline;
       font-family: 'Orbitron', monospace;
+      padding: 0;
+      margin-bottom: 8px;
       font-size: 1rem;
     }
 
-    .datasheet-row {
+    button.expand-btn:hover {
+      color: #00ff9e;
+    }
+
+    .datasheet {
+      white-space: pre-wrap;
       display: none;
-    }
-
-    .datasheet-cell {
-      padding: 10px 16px;
       color: #00ffd5;
-      background: #0f0f1a;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
+      border-top: 1px solid #00ffd5aa;
+      padding-top: 10px;
+      margin-top: 5px;
     }
 
+    /* Responsive */
     @media (max-width: 600px) {
       #searchInput {
-        width: 90%;
+        width: 90% !important;
+        font-size: 1rem;
       }
-      table, th, td {
-        font-size: 0.85rem;
+
+      #equipmentList {
+        max-width: 100%;
+        padding: 0 10px;
+      }
+
+      .equipment-card {
+        padding: 12px 15px;
       }
     }
   </style>
@@ -103,18 +118,9 @@
 
   <input type="text" id="searchInput" placeholder="Search by Equipment or Armoire..." />
 
-  <table id="equipmentTable">
-    <thead>
-      <tr>
-        <th>Equipment Name</th>
-        <th>Armoire</th>
-        <th>Datasheet</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Dynamic rows go here -->
-    </tbody>
-  </table>
+  <div id="equipmentList">
+    <!-- Equipment cards inserted here -->
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
@@ -139,8 +145,8 @@
 
     async function loadEquipment(filter = "") {
       const snapshot = await getDocs(equipmentRef);
-      const tbody = document.querySelector("#equipmentTable tbody");
-      tbody.innerHTML = "";
+      const list = document.getElementById("equipmentList");
+      list.innerHTML = "";
 
       snapshot.forEach(docSnap => {
         const data = docSnap.data();
@@ -148,44 +154,41 @@
         const armoireLower = (data.armoire || "").toLowerCase();
         if (!nameLower.includes(filter) && !armoireLower.includes(filter)) return;
 
-        // Main row
-        const row = document.createElement("tr");
+        const card = document.createElement("div");
+        card.className = "equipment-card";
 
-        const nameCell = document.createElement("td");
-        nameCell.textContent = data.name;
+        const nameEl = document.createElement("div");
+        nameEl.className = "equipment-name";
+        nameEl.textContent = data.name;
 
-        const armoireCell = document.createElement("td");
-        armoireCell.textContent = data.armoire || "—";
+        const armoireEl = document.createElement("div");
+        armoireEl.className = "armoire-number";
+        armoireEl.textContent = "Armoire: " + (data.armoire || "—");
 
-        const btnCell = document.createElement("td");
         const btn = document.createElement("button");
         btn.className = "expand-btn";
-        btn.textContent = "View";
-        btnCell.appendChild(btn);
+        btn.textContent = "View Datasheet";
 
-        row.appendChild(nameCell);
-        row.appendChild(armoireCell);
-        row.appendChild(btnCell);
-
-        // Datasheet row
-        const datasheetRow = document.createElement("tr");
-        datasheetRow.className = "datasheet-row";
-
-        const datasheetCell = document.createElement("td");
-        datasheetCell.colSpan = 3;
-        datasheetCell.className = "datasheet-cell";
-        datasheetCell.textContent = data.datasheet || "No datasheet available.";
-
-        datasheetRow.appendChild(datasheetCell);
+        const datasheetEl = document.createElement("div");
+        datasheetEl.className = "datasheet";
+        datasheetEl.textContent = data.datasheet || "No datasheet available.";
 
         btn.addEventListener("click", () => {
-          const isVisible = datasheetRow.style.display === "table-row";
-          datasheetRow.style.display = isVisible ? "none" : "table-row";
-          btn.textContent = isVisible ? "View" : "Hide";
+          if (datasheetEl.style.display === "none" || datasheetEl.style.display === "") {
+            datasheetEl.style.display = "block";
+            btn.textContent = "Hide Datasheet";
+          } else {
+            datasheetEl.style.display = "none";
+            btn.textContent = "View Datasheet";
+          }
         });
 
-        tbody.appendChild(row);
-        tbody.appendChild(datasheetRow);
+        card.appendChild(nameEl);
+        card.appendChild(armoireEl);
+        card.appendChild(btn);
+        card.appendChild(datasheetEl);
+
+        list.appendChild(card);
       });
     }
 
@@ -198,3 +201,5 @@
   </script>
 </body>
 </html>
+
+
