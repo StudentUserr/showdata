@@ -7,6 +7,10 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
 
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       background: #0f0f1a;
       color: #00ffd5;
@@ -25,7 +29,7 @@
     }
 
     #searchInput {
-      padding: 10px;
+      padding: 12px;
       width: 100%;
       max-width: 600px;
       border: 1.5px solid #00ffd5;
@@ -38,16 +42,20 @@
       font-size: 1rem;
     }
 
+    .table-container {
+      overflow-x: auto;
+    }
+
     table {
       width: 100%;
+      min-width: 500px;
       border-collapse: collapse;
       background: #111126;
       box-shadow: 0 0 15px #00ffd5aa;
-      font-size: 0.95rem;
     }
 
     th, td {
-      padding: 12px 10px;
+      padding: 12px 15px;
       border-bottom: 1px solid #00ffd5aa;
       text-align: left;
       vertical-align: top;
@@ -56,8 +64,7 @@
     th {
       background: #001f2a;
       text-transform: uppercase;
-      letter-spacing: 1px;
-      font-size: 0.9rem;
+      letter-spacing: 2px;
     }
 
     tr:hover {
@@ -72,6 +79,8 @@
       cursor: pointer;
       text-decoration: underline;
       font-family: 'Orbitron', monospace;
+      padding: 0;
+      margin: 0;
       font-size: 0.9rem;
     }
 
@@ -79,41 +88,22 @@
       color: #00ff9e;
     }
 
-    /* Responsive adjustments */
-    @media screen and (max-width: 600px) {
-      table, thead, tbody, th, td, tr {
-        display: block;
-        width: 100%;
+    p {
+      margin-top: 5px;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.4rem;
       }
 
-      thead {
-        display: none;
+      #searchInput {
+        font-size: 0.9rem;
       }
 
-      tr {
-        margin-bottom: 15px;
-        border-bottom: 2px solid #00ffd555;
-        padding-bottom: 10px;
-      }
-
-      td {
-        text-align: right;
-        padding-left: 50%;
-        position: relative;
-      }
-
-      td::before {
-        content: attr(data-label);
-        position: absolute;
-        left: 10px;
-        top: 12px;
-        font-weight: bold;
-        text-transform: uppercase;
-        color: #00ffd5;
-        font-size: 0.8rem;
-      }
-
-      button.expand-btn {
+      th, td {
+        padding: 10px;
         font-size: 0.85rem;
       }
     }
@@ -125,18 +115,20 @@
 
   <input type="text" id="searchInput" placeholder="Search by Equipment or Armoire..." />
 
-  <table id="equipmentTable">
-    <thead>
-      <tr>
-        <th>Equipment</th>
-        <th>Datasheet</th>
-        <th>Armoire Number</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Content will be inserted by JS -->
-    </tbody>
-  </table>
+  <div class="table-container">
+    <table id="equipmentTable">
+      <thead>
+        <tr>
+          <th>Equipment</th>
+          <th>Datasheet</th>
+          <th>Armoire Number</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Content will be inserted by JS -->
+      </tbody>
+    </table>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
@@ -173,10 +165,8 @@
 
         const nameCell = document.createElement("td");
         nameCell.textContent = data.name;
-        nameCell.setAttribute("data-label", "Equipment");
 
         const sheetCell = document.createElement("td");
-        sheetCell.setAttribute("data-label", "Datasheet");
         const button = document.createElement("button");
         button.textContent = "View Datasheet";
         button.className = "expand-btn";
@@ -195,7 +185,6 @@
 
         const armoireCell = document.createElement("td");
         armoireCell.textContent = data.armoire || "—";
-        armoireCell.setAttribute("data-label", "Armoire Number");
 
         row.appendChild(nameCell);
         row.appendChild(sheetCell);
