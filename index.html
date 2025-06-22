@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Armoire Equipment Viewer</title>
+  <title>Equipment List</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
 
@@ -36,7 +36,6 @@
       font-size: 1rem;
     }
 
-    /* Container for all equipment cards */
     #equipmentList {
       max-width: 700px;
       margin: 0 auto;
@@ -45,7 +44,6 @@
       gap: 20px;
     }
 
-    /* Single equipment card */
     .equipment-card {
       background: #111126;
       border: 1.5px solid #00ffd5aa;
@@ -84,7 +82,7 @@
       color: #00ff9e;
     }
 
-    .datasheet {
+    .description {
       white-space: pre-wrap;
       display: none;
       color: #00ffd5;
@@ -94,7 +92,6 @@
       margin-top: 5px;
     }
 
-    /* Responsive */
     @media (max-width: 600px) {
       #searchInput {
         width: 90% !important;
@@ -114,9 +111,9 @@
 </head>
 <body>
 
-  <h1>Armoire Equipment List</h1>
+  <h1>Equipment List</h1>
 
-  <input type="text" id="searchInput" placeholder="Search by Equipment or Armoire..." />
+  <input type="text" id="searchInput" placeholder="Search by equipment or cabinet..." />
 
   <div id="equipmentList">
     <!-- Equipment cards inserted here -->
@@ -163,30 +160,30 @@
 
         const armoireEl = document.createElement("div");
         armoireEl.className = "armoire-number";
-        armoireEl.textContent = "Armoire: " + (data.armoire || "—");
+        armoireEl.textContent = "Cabinet: " + (data.armoire || "—");
 
         const btn = document.createElement("button");
         btn.className = "expand-btn";
-        btn.textContent = "View Datasheet";
+        btn.textContent = "View Description";
 
-        const datasheetEl = document.createElement("div");
-        datasheetEl.className = "datasheet";
-        datasheetEl.textContent = data.datasheet || "No datasheet available.";
+        const descEl = document.createElement("div");
+        descEl.className = "description";
+        descEl.textContent = data.description || "No description available.";
 
         btn.addEventListener("click", () => {
-          if (datasheetEl.style.display === "none" || datasheetEl.style.display === "") {
-            datasheetEl.style.display = "block";
-            btn.textContent = "Hide Datasheet";
+          if (descEl.style.display === "none" || descEl.style.display === "") {
+            descEl.style.display = "block";
+            btn.textContent = "Hide Description";
           } else {
-            datasheetEl.style.display = "none";
-            btn.textContent = "View Datasheet";
+            descEl.style.display = "none";
+            btn.textContent = "View Description";
           }
         });
 
         card.appendChild(nameEl);
         card.appendChild(armoireEl);
         card.appendChild(btn);
-        card.appendChild(datasheetEl);
+        card.appendChild(descEl);
 
         list.appendChild(card);
       });
@@ -201,5 +198,3 @@
   </script>
 </body>
 </html>
-
-
